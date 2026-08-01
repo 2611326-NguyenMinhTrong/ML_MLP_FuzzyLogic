@@ -1,0 +1,162 @@
+[
+  {
+    "file": "test00822_bus.png",
+    "test_index": 822,
+    "fine": 13,
+    "fine_name": "bus",
+    "coarse": 18,
+    "coarse_name": "vehicles_1"
+  },
+  {
+    "file": "test00884_aquarium_fish.png",
+    "test_index": 884,
+    "fine": 1,
+    "fine_name": "aquarium_fish",
+    "coarse": 1,
+    "coarse_name": "fish"
+  },
+  {
+    "file": "test01237_cloud.png",
+    "test_index": 1237,
+    "fine": 23,
+    "fine_name": "cloud",
+    "coarse": 10,
+    "coarse_name": "large_natural_outdoor_scenes"
+  },
+  {
+    "file": "test01480_beetle.png",
+    "test_index": 1480,
+    "fine": 7,
+    "fine_name": "beetle",
+    "coarse": 7,
+    "coarse_name": "insects"
+  },
+  {
+    "file": "test02082_motorcycle.png",
+    "test_index": 2082,
+    "fine": 48,
+    "fine_name": "motorcycle",
+    "coarse": 18,
+    "coarse_name": "vehicles_1"
+  },
+  {
+    "file": "test02654_maple_tree.png",
+    "test_index": 2654,
+    "fine": 47,
+    "fine_name": "maple_tree",
+    "coarse": 17,
+    "coarse_name": "trees"
+  },
+  {
+    "file": "test02777_baby.png",
+    "test_index": 2777,
+    "fine": 2,
+    "fine_name": "baby",
+    "coarse": 14,
+    "coarse_name": "people"
+  },
+  {
+    "file": "test02951_lawn_mower.png",
+    "test_index": 2951,
+    "fine": 41,
+    "fine_name": "lawn_mower",
+    "coarse": 19,
+    "coarse_name": "vehicles_2"
+  },
+  {
+    "file": "test05251_can.png",
+    "test_index": 5251,
+    "fine": 16,
+    "fine_name": "can",
+    "coarse": 3,
+    "coarse_name": "food_containers"
+  },
+  {
+    "file": "test05541_raccoon.png",
+    "test_index": 5541,
+    "fine": 66,
+    "fine_name": "raccoon",
+    "coarse": 12,
+    "coarse_name": "medium_mammals"
+  },
+  {
+    "file": "test06333_oak_tree.png",
+    "test_index": 6333,
+    "fine": 52,
+    "fine_name": "oak_tree",
+    "coarse": 17,
+    "coarse_name": "trees"
+  },
+  {
+    "file": "test06579_snake.png",
+    "test_index": 6579,
+    "fine": 78,
+    "fine_name": "snake",
+    "coarse": 15,
+    "coarse_name": "reptiles"
+  },
+  {
+    "file": "test06809_wardrobe.png",
+    "test_index": 6809,
+    "fine": 94,
+    "fine_name": "wardrobe",
+    "coarse": 6,
+    "coarse_name": "household_furniture"
+  },
+  {
+    "file": "test07127_squirrel.png",
+    "test_index": 7127,
+    "fine": 80,
+    "fine_name": "squirrel",
+    "coarse": 16,
+    "coarse_name": "small_mammals"
+  },
+  {
+    "file": "test08433_orchid.png",
+    "test_index": 8433,
+    "fine": 54,
+    "fine_name": "orchid",
+    "coarse": 2,
+    "coarse_name": "flowers"
+  },
+  {
+    "file": "test08661_bicycle.png",
+    "test_index": 8661,
+    "fine": 8,
+    "fine_name": "bicycle",
+    "coarse": 18,
+    "coarse_name": "vehicles_1"
+  },
+  {
+    "file": "test08795_television.png",
+    "test_index": 8795,
+    "fine": 87,
+    "fine_name": "television",
+    "coarse": 5,
+    "coarse_name": "household_electrical_devices"
+  },
+  {
+    "file": "test08879_porcupine.png",
+    "test_index": 8879,
+    "fine": 63,
+    "fine_name": "porcupine",
+    "coarse": 12,
+    "coarse_name": "medium_mammals"
+  },
+  {
+    "file": "test09372_trout.png",
+    "test_index": 9372,
+    "fine": 91,
+    "fine_name": "trout",
+    "coarse": 1,
+    "coarse_name": "fish"
+  },
+  {
+    "file": "test09727_boy.png",
+    "test_index": 9727,
+    "fine": 11,
+    "fine_name": "boy",
+    "coarse": 14,
+    "coarse_name": "people"
+  }
+]

@@ -1,0 +1,16 @@
+# Thư viện cho app demo. Cài local: pip install -r requirements.txt
+#
+# Dòng --extra-index-url bên dưới BẮT BUỘC: nó cho pip biết lấy bản torch CPU
+# (từ index riêng của PyTorch). Không có dòng này, trên Linux pip sẽ kéo bản
+# CUDA ~2GB — vượt giới hạn của các nền tảng deploy miễn phí.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+torch==2.13.0+cpu
+streamlit==1.59.2
+pandas==3.0.3
+plotly==6.9.0
+pillow==12.2.0
+numpy==2.4.6
+
+# Ghi chú: app KHÔNG dùng torchvision (chỉ notebook huấn luyện mới cần), nên
+# đã bỏ khỏi đây để giảm dung lượng cài đặt khi deploy.

@@ -1,0 +1,7 @@
+# Chỉ bỏ qua file rác.
+# LƯU Ý: checkpoints/ và results/ PHẢI được commit lên GitHub thì app mới chạy
+# được trên Streamlit Cloud (host cần các file này). Vì vậy KHÔNG bỏ qua chúng.
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
