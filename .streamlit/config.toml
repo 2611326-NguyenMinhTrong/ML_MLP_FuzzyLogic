@@ -1,0 +1,4 @@
+# toolbarMode = "minimal" ẩn thanh công cụ nhà phát triển (Rerun, settings, Deploy)
+# ở góc trên phải của chính app Streamlit. Đây là cách chính thức, được hỗ trợ.
+[client]
+toolbarMode = "minimal"

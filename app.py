@@ -19,6 +19,20 @@ from ui import compare_view, dashboard_view, single_view
 st.set_page_config(page_title="MLP + Fuzzy Logic — CIFAR-100",
                    page_icon="🧠", layout="wide")
 
+# Ẩn thanh header của Streamlit (menu ⋮, khu vực toolbar) và footer
+# "Made with Streamlit" để giao diện gọn hơn khi demo. Không ảnh hưởng chức năng.
+st.markdown(
+    """
+    <style>
+      [data-testid="stHeader"] { display: none; }
+      [data-testid="stToolbar"] { display: none; }
+      footer { visibility: hidden; }
+      #MainMenu { visibility: hidden; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 @st.cache_resource(show_spinner="Đang nạp checkpoint...")
 def get_model(path_str):
