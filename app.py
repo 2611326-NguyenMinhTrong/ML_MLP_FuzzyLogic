@@ -19,30 +19,6 @@ from ui import compare_view, dashboard_view, single_view
 st.set_page_config(page_title="MLP + Fuzzy Logic — CIFAR-100",
                    page_icon="🧠", layout="wide")
 
-# Ẩn các thứ thừa của Streamlit cho gọn (toolbar dev, thanh màu trên cùng,
-# menu ⋮, footer "Made with Streamlit"). LƯU Ý: KHÔNG ẩn cả header bằng
-# display:none — vì nút mở lại sidebar nằm trong header, ẩn header sẽ khiến
-# sidebar đóng rồi không mở lại được. Thay vào đó làm header trong suốt.
-st.markdown(
-    """
-    <style>
-      [data-testid="stHeader"] { background: transparent; box-shadow: none; }
-      [data-testid="stToolbar"] { display: none; }
-      [data-testid="stDecoration"] { display: none; }
-      #MainMenu { visibility: hidden; }
-      footer { visibility: hidden; }
-      /* Bảo đảm nút thu/mở sidebar luôn hiện và bấm được */
-      [data-testid="stSidebarCollapsedControl"],
-      [data-testid="stExpandSidebarButton"],
-      [data-testid="collapsedControl"] {
-        visibility: visible !important;
-        display: flex !important;
-      }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 
 @st.cache_resource(show_spinner="Đang nạp checkpoint...")
 def get_model(path_str):
