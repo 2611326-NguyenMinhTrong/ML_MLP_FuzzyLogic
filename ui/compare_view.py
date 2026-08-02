@@ -22,14 +22,14 @@ from core.registry import RESULTS_DIR, default_pair, list_checkpoints, list_samp
 from ui.single_view import COARSE_HUE, CRITICAL, FINE_HUE, GOOD, MUTED, _bar, _mode
 
 # Ô b / ô c của flip matrix (mục 1.2 kế hoạch, PHẦN 9 notebook)
-FIXED = "fixed"      # ô c: trái SAI -> phải ĐÚNG  (mô hình phải sửa được)
-BROKEN = "broken"    # ô b: trái ĐÚNG -> phải SAI  (mô hình phải phá hỏng)
+FIXED = "fixed"      # ô c: mô hình TRÁI sai -> mô hình PHẢI đúng
+BROKEN = "broken"    # ô b: mô hình TRÁI đúng -> mô hình PHẢI sai
 SAME = "same"
 
 STATUS_STYLE = {
-    FIXED: (GOOD, "✓", "sửa được"),
-    BROKEN: (CRITICAL, "✕", "phá hỏng"),
-    SAME: (MUTED, "–", "không đổi"),
+    FIXED: (GOOD, "✓", "phải đúng, trái sai"),
+    BROKEN: (CRITICAL, "✕", "phải sai, trái đúng"),
+    SAME: (MUTED, "–", "hai bên giống nhau"),
 }
 
 
@@ -145,9 +145,9 @@ def _detail_dialog(row, meta, left_it, right_it, mode):
                 f"`{cn[p['pred_coarse_raw']]}`{v}")
 
     verdict = {
-        FIXED: "→ mô hình PHẢI **sửa được** ảnh này.",
-        BROKEN: "→ mô hình PHẢI **phá hỏng** ảnh này.",
-        SAME: "→ hai mô hình **không khác nhau** về đúng/sai trên ảnh này.",
+        FIXED: "→ **bên phải đoán đúng, bên trái đoán sai** ở ảnh này.",
+        BROKEN: "→ **bên phải đoán sai, bên trái đoán đúng** ở ảnh này.",
+        SAME: "→ hai mô hình **cùng đúng hoặc cùng sai** trên ảnh này.",
     }[row["status"]]
     st.markdown(f"{_say(left_it, lp)}; {_say(right_it, rp)}. {verdict}")
 
@@ -229,11 +229,11 @@ def render():
     st.markdown(
         f"<div style='display:flex;gap:20px;flex-wrap:wrap;font-size:14px;"
         f"margin:6px 0 14px'>"
-        f"<span><b style='color:{GOOD}'>✓ viền xanh</b> — phải sửa được "
-        f"({n_fix} ảnh)</span>"
-        f"<span><b style='color:{CRITICAL}'>✕ viền đỏ</b> — phải phá hỏng "
-        f"({n_brk} ảnh)</span>"
-        f"<span><b style='color:{MUTED}'>– viền xám</b> — không đổi "
+        f"<span><b style='color:{GOOD}'>✓ viền xanh</b> — bên phải đúng, "
+        f"bên trái sai ({n_fix} ảnh)</span>"
+        f"<span><b style='color:{CRITICAL}'>✕ viền đỏ</b> — bên phải sai, "
+        f"bên trái đúng ({n_brk} ảnh)</span>"
+        f"<span><b style='color:{MUTED}'>– viền xám</b> — hai bên giống nhau "
         f"({len(rows) - n_fix - n_brk} ảnh)</span></div>",
         unsafe_allow_html=True)
 
@@ -242,9 +242,10 @@ def render():
         st.caption(
             f"Gallery này chỉ là **{len(rows)} ảnh lấy ngẫu nhiên**. Trên toàn bộ "
             f"10.000 ảnh test (λ\\*={bc['lambda_star']:g}, seed {bc['seed']}): "
-            f"**{len(bc['cell_c_fixed'])}** mẫu được sửa, "
-            f"**{len(bc['cell_b_broken'])}** mẫu bị phá hỏng — tức mô hình M "
-            f"phá nhiều hơn sửa. Xem `table_flip_mcnemar.csv` để có kiểm định McNemar."
+            f"**{len(bc['cell_c_fixed'])}** ảnh bên phải đúng-bên trái sai, "
+            f"**{len(bc['cell_b_broken'])}** ảnh bên phải sai-bên trái đúng — tức "
+            f"mô hình M (bên phải) làm sai nhiều hơn làm đúng. Xem "
+            f"`table_flip_mcnemar.csv` để có kiểm định McNemar."
         )
 
     # --- Lưới ảnh ---

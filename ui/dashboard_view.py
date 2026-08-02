@@ -212,7 +212,8 @@ def render():
                      help="test = số liệu chốt cuối; val = số liệu dùng để chọn λ*")
 
     # --- Bảng pivot λ × chế độ -------------------------------------------
-    st.subheader(f"Bảng tổng hợp theo λ × chế độ suy luận  ({split}, mean ± std trên các seed)")
+    st.subheader(f"Bảng tổng hợp theo λ × chế độ suy luận  ({split}, mean ± std trên các seed)",
+                 anchor=False)
     c1, c2 = st.columns(2)
     for col, (label, metric) in zip((c1, c2),
                                     [("Consistency (%)", "consist"),
@@ -240,7 +241,7 @@ def render():
     st.divider()
 
     # --- Đồ thị trade-off + Pareto ----------------------------------------
-    st.subheader("Đường đánh đổi accuracy ↔ consistency")
+    st.subheader("Đường đánh đổi accuracy ↔ consistency", anchor=False)
     lambda_star = _pick_lambda_star(df)
     fig, g = _tradeoff_chart(df, split, lambda_star, mode)
     st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
@@ -256,7 +257,7 @@ def render():
 
     # --- Kết luận nhanh -----------------------------------------------------
     st.divider()
-    st.subheader("📌 Kết luận nhanh")
+    st.subheader("Kết luận nhanh", anchor=False)
 
     if n_dom > 0:
         dom_list = ", ".join(f"λ={v:g}" for v in sorted(g[~g["pareto"]]["lambda"]))

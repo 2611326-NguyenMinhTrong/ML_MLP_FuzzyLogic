@@ -27,8 +27,6 @@ def get_model(path_str):
 
 
 st.title("MLP + Fuzzy Logic — phân loại ảnh phân cấp")
-st.caption("CIFAR-100 · 100 nhãn con → 20 nhãn cha · "
-           "so sánh 3 chế độ suy luận raw / hard / marginal")
 
 items = list_checkpoints()
 ok_items = [d for d in items if not d.get("error")]
@@ -74,7 +72,7 @@ with st.sidebar:
                f"{meta['config']['n_fine']} nhãn con → "
                f"{meta['config']['n_coarse']} nhãn cha")
 
-tab1, tab2, tab3 = st.tabs(["🔍 Một ảnh", "⚖️ So sánh B0 vs M", "📊 Tổng quan"])
+tab1, tab2, tab3 = st.tabs(["Một ảnh", "So sánh B0 vs M", "Tổng quan"])
 
 with tab1:
     single_view.render(model, meta)
@@ -84,10 +82,3 @@ with tab2:
 
 with tab3:
     dashboard_view.render()
-
-st.divider()
-st.caption(
-    "⚠️ MLP thuần chỉ đạt ~25% độ chính xác nhãn con trên CIFAR-100 — đây là "
-    "giới hạn của kiến trúc, không phải lỗi cài đặt. Ảnh ngoài phân bố "
-    "CIFAR sẽ sai rất thường xuyên; hãy dùng gallery ảnh mẫu để xem cơ chế."
-)
