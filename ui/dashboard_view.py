@@ -99,6 +99,48 @@ def _pick_lambda_star(df):
     return max(candidates, key=lambda lam: con.loc[lam])
 
 
+def _baselines(df, split, lambda_star):
+    """Bốn mốc B0/B1/B2/M đọc trực tiếp từ results.csv cho một split.
+
+    B0/B1/B2 cùng dựa trên mô hình λ=0 (B1 = chế độ hard, B2 = chế độ marginal);
+    M = mô hình λ* ở chế độ raw. Trả list dict để dựng bảng, hoặc None nếu thiếu.
+    """
+    sub = _base(df)
+    sub = sub[sub.split == split]
+    if sub.empty:
+        return None
+
+    def cell(lam, mode, metric):
+        s = sub[(sub["lambda"] == lam) & (sub["mode"] == mode)][metric]
+        if s.empty:
+            return "—"
+        m, sd = s.mean(), s.std()
+        sd = 0.0 if pd.isna(sd) else sd
+        return f"{m:.2f} ± {sd:.2f}" if sd > 0 else f"{m:.2f}"
+
+    if sub[sub["lambda"] == 0.0].empty:
+        return None
+    acc0 = cell(0.0, "raw", "acc_fine")
+    rows = [
+        {"Mốc": "B0", "Cách làm": "MLP thuần (λ=0), lấy thẳng đầu ra tầng cha",
+         "Accuracy nhãn con (%)": acc0,
+         "Nhất quán (%)": cell(0.0, "raw", "consist"), "Chi phí": "mô hình gốc"},
+        {"Mốc": "B1", "Cách làm": "Hậu xử lý cứng: suy nhãn cha từ nhãn con",
+         "Accuracy nhãn con (%)": acc0,
+         "Nhất quán (%)": cell(0.0, "hard", "consist"), "Chi phí": "miễn phí"},
+        {"Mốc": "B2", "Cách làm": "Marginalization: cộng xác suất nhãn con cùng nhóm",
+         "Accuracy nhãn con (%)": acc0,
+         "Nhất quán (%)": cell(0.0, "marginal", "consist"), "Chi phí": "miễn phí"},
+    ]
+    if lambda_star is not None and not sub[sub["lambda"] == lambda_star].empty:
+        rows.append(
+            {"Mốc": "M", "Cách làm": f"Fuzzy logic loss (λ={lambda_star:g}), đầu ra thô",
+             "Accuracy nhãn con (%)": cell(lambda_star, "raw", "acc_fine"),
+             "Nhất quán (%)": cell(lambda_star, "raw", "consist"),
+             "Chi phí": "huấn luyện lại"})
+    return rows
+
+
 def _tradeoff_chart(df, split, lambda_star, mode):
     sub = _base(df)
     sub = sub[(sub["mode"] == "raw") & (sub.split == split)]
@@ -200,6 +242,25 @@ def render():
     split = st.radio("Tập dữ liệu", ["test", "val"], horizontal=True,
                      help="test = số liệu chốt cuối; val = số liệu dùng để chọn λ*")
 
+    lambda_star = _pick_lambda_star(df)
+
+    # --- Bảng bốn mốc B0 / B1 / B2 / M ------------------------------------
+    st.subheader("Bốn mốc so sánh: B0 · B1 · B2 · M", anchor=False)
+    base_rows = _baselines(df, split, lambda_star)
+    if base_rows:
+        st.dataframe(base_rows, hide_index=True, width="stretch")
+        st.caption(
+            "**B0** = MLP thuần. **B1** (hậu xử lý cứng) và **B2** (marginalization) "
+            "chỉ xử lý lại đầu ra của B0 — không tốn huấn luyện thêm nên accuracy "
+            "giữ nguyên bằng B0. **M** = huấn luyện thêm fuzzy logic loss ở λ\\*. "
+            f"Số liệu trên **{split}**, trung bình ± độ lệch chuẩn qua các seed. "
+            "Điểm mấu chốt: M tốn công huấn luyện nhưng accuracy thấp hơn, và độ "
+            "nhất quán vẫn thua hai mốc miễn phí B1/B2."
+        )
+    else:
+        st.info(f"Không đủ dữ liệu trên tập {split} để dựng bảng bốn mốc.")
+    st.divider()
+
     # Bảng pivot λ × chế độ
     st.subheader(f"Bảng tổng hợp theo λ × chế độ suy luận  ({split}, mean ± std trên các seed)",
                  anchor=False)
@@ -230,7 +291,6 @@ def render():
 
     # --- Đồ thị trade-off + Pareto ----------------------------------------
     st.subheader("Đường đánh đổi accuracy ↔ consistency", anchor=False)
-    lambda_star = _pick_lambda_star(df)
     fig, g = _tradeoff_chart(df, split, lambda_star, mode)
     st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
