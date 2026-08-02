@@ -1,13 +1,7 @@
-"""Tab 3 — tổng quan (Step 2.5).
+"""Tab 3: bảng tổng hợp và đồ thị trade-off từ results.csv.
 
-Đọc TRỰC TIẾP `results/results.csv`, không phụ thuộc `report_assets.md` hay
-`mechanism_verdict.json` của PHẦN 14 — để DoD "máy B chạy đủ 3 tab chỉ với
-checkpoints/ + results.csv" luôn đúng kể cả khi các file phân tích khác của A
-chưa được chép sang.
-
-Mọi con số trong tab này (Pareto, λ đề xuất, chênh lệch) được **tính lại từ
-đầu** bằng thuật toán tường minh, không lặp lại kết luận đã in sẵn ở notebook —
-vì kết luận trên val (mục "Sự cố λ*") không nhất thiết đúng nguyên trên test.
+Các số liệu (Pareto, λ đề xuất, chênh lệch) đều được tính lại trực tiếp từ
+results.csv.
 """
 
 import pandas as pd
@@ -17,8 +11,7 @@ import streamlit as st
 from core.registry import RESULTS_DIR
 from ui.single_view import FINE_HUE, MUTED, _mode
 
-# Phải khớp ACC_BUDGET ở PHẦN 8.1 notebook (mục 8.1 kế hoạch) — đây là quy tắc
-# nghiệp vụ đã đăng ký trước, không phải hằng số tuỳ tiện.
+# Mức accuracy tối đa chấp nhận hy sinh khi chọn λ đề xuất
 ACC_BUDGET = 1.0
 
 BASE_CFG = dict(residuum="lukasiewicz", penalty="linear", warmup=3, epochs=20)
@@ -26,13 +19,12 @@ MODE_ORDER = ["raw", "hard", "marginal"]
 MODE_VN = {"raw": "raw (đầu ra thô)", "hard": "hard (hậu xử lý cứng)",
           "marginal": "marginal"}
 
-# Success-text theo palette đã kiểm chứng (references/palette.md của skill dataviz)
 SUCCESS_TEXT = {"light": "#006300", "dark": "#0ca30c"}
 
 
 @st.cache_data(show_spinner=False)
 def _load(path_str, mtime):
-    """mtime trong cache key: results.csv có thể được ghi thêm khi lưới chạy tiếp."""
+    """Đọc results.csv (cache theo thời điểm sửa file)."""
     return pd.read_csv(path_str)
 
 
@@ -87,9 +79,8 @@ def _pareto_frontier(points):
 
 
 def _pick_lambda_star(df):
-    """Quy tắc 'budget' — CÙNG nguyên tắc PHẦN 8.1 notebook, chọn trên VAL
-    (không bao giờ trên test): trong λ>0, ưu tiên consistency cao nhất với điều
-    kiện acc giảm <= ACC_BUDGET so với B0."""
+    """Chọn λ đề xuất trên tập validation: trong các λ>0, lấy consistency cao
+    nhất với điều kiện accuracy giảm không quá ACC_BUDGET so với B0."""
     sub = _base(df)
     sub = sub[(sub["mode"] == "raw") & (sub.split == "val")]
     if sub.empty:
@@ -173,8 +164,7 @@ def _tradeoff_chart(df, split, lambda_star, mode):
     fig.update_layout(
         title=dict(text=f"Trade-off accuracy ↔ consistency theo λ ({split}, mean±std)",
                   font=dict(size=14, color=MUTED)),
-        # automargin: tránh lặp lại lỗi mất nhãn/chồng chữ đã gặp ở bar chart
-        # (mục 8 bảng bẫy) — lề cố định luôn sai với dữ liệu chưa biết trước.
+        # automargin để nhãn trục không bị cắt
         xaxis=dict(title=dict(text="Accuracy nhãn con (%)", font=dict(color=MUTED)),
                   gridcolor="rgba(137,135,129,0.18)", tickfont=dict(color=MUTED),
                   automargin=True),
@@ -203,15 +193,14 @@ def render():
                "split", "acc_fine", "consist", "exact", "epochs"}
     missing = required - set(df.columns)
     if missing:
-        st.error(f"`results.csv` thiếu cột: {', '.join(sorted(missing))}. "
-                 "File có thể sinh bởi phiên bản notebook cũ.")
+        st.error(f"`results.csv` thiếu cột: {', '.join(sorted(missing))}.")
         return
 
     mode = _mode()
     split = st.radio("Tập dữ liệu", ["test", "val"], horizontal=True,
                      help="test = số liệu chốt cuối; val = số liệu dùng để chọn λ*")
 
-    # --- Bảng pivot λ × chế độ -------------------------------------------
+    # Bảng pivot λ × chế độ
     st.subheader(f"Bảng tổng hợp theo λ × chế độ suy luận  ({split}, mean ± std trên các seed)",
                  anchor=False)
     c1, c2 = st.columns(2)
@@ -228,8 +217,7 @@ def render():
 
     acc_disp, _ = _pivot(df, "acc_fine", split)
     if not acc_disp.empty:
-        # acc_fine KHÔNG đổi theo mode (chỉ phụ thuộc đầu ra tầng con) — chỉ
-        # cần 1 cột đại diện, tránh lặp 3 cột giống hệt nhau gây hiểu nhầm.
+        # acc_fine không đổi theo chế độ nên chỉ cần một cột đại diện
         first_col = acc_disp.columns[0]
         st.caption(
             f"Accuracy nhãn con theo λ ({split}, không đổi theo chế độ vì chỉ "
@@ -314,7 +302,6 @@ def render():
             )
 
     st.caption(
-        "Tab này tính toán độc lập, chỉ từ `results.csv` — không đọc "
-        "`mechanism_verdict.json` của PHẦN 14. Xem báo cáo đầy đủ (McNemar, "
-        "nhóm chứng, phân tích V/NV) trong `report_assets.md` do notebook sinh."
+        "Các số liệu ở tab này được tính trực tiếp từ `results.csv`. "
+        "Phân tích đầy đủ (McNemar, nhóm chứng, V/NV) nằm trong báo cáo."
     )

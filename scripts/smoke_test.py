@@ -1,22 +1,14 @@
 #!/usr/bin/env python3
-"""Smoke test cho phần lõi của app — DoD của Step 1.3.
+"""Kiểm tra nhanh phần lõi của app.
 
 Chạy:  python scripts/smoke_test.py      (exit 0 = PASS, 1 = FAIL)
-
-Kiểm tra NGỮ NGHĨA chứ không chỉ "chạy không lỗi": các lỗi nguy hiểm nhất
-trong dự án này đều không làm chương trình dừng, chúng chỉ cho ra số sai.
 """
 
 import sys
 import traceback
 from pathlib import Path
 
-# Console Windows mặc định dùng cp1252, không mã hoá được ✅/❌ hay chữ có dấu
-# -> UnicodeEncodeError ngay từ dòng in đầu tiên. Ép UTF-8 ở ĐÂY, sớm nhất có
-# thể (trước torch/PIL, trước mọi print), để không phải bắt người dùng nhớ
-# set PYTHONIOENCODING thủ công. Phát hiện bằng cách chạy smoke test trong
-# virtualenv sạch (Step 3.3 DoD) — mọi lần chạy thử trước đó trong phiên làm
-# việc này đều VÔ TÌNH che mất lỗi vì luôn set biến môi trường thủ công.
+# Console Windows mặc định dùng cp1252 nên không in được ✅/❌; ép UTF-8 ở đây.
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
@@ -67,7 +59,7 @@ def t2_labels():
 
 def t3_samples():
     s = list_samples()
-    assert s, "assets/samples/ rỗng — cần 20 ảnh PNG do PHẦN 6 notebook xuất"
+    assert s, "assets/samples/ rỗng — cần các ảnh PNG mẫu"
     ctx["samples"] = s
     with_idx = sum(1 for m in s if m.get("test_index") is not None)
     return f"{len(s)} ảnh, {with_idx} ảnh có chỉ số tập test (khớp bc_indices)"
@@ -196,7 +188,7 @@ for name, fn in [
     ("1. registry quét được checkpoint", t1_registry),
     ("2. nhãn hiển thị không trùng, có B0", t2_labels),
     ("3. có ảnh mẫu trong assets/samples", t3_samples),
-    ("4. load_ckpt + contract nhất quán", t4_load),
+    ("4. load_ckpt và metadata nhất quán", t4_load),
     ("5. preprocess ra tensor 3x32x32", t5_preprocess),
     ("6. mean/std đọc TỪ checkpoint", t6_norm_from_ckpt),
     ("7. predict trả đủ 3 chế độ", t7_predict),
@@ -209,7 +201,7 @@ for name, fn in [
     check(name, fn)
 
 print("=" * 68)
-print(f"{'SMOKE TEST — fuzzy-mlp-demo (Step 1.3)':^68}")
+print(f"{'KIEM TRA NHANH — fuzzy-mlp-demo':^68}")
 print("=" * 68)
 for name, ok, detail in checks:
     print(f"  [{'PASS ✅' if ok else 'FAIL ❌'}] {name}")

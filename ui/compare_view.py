@@ -1,12 +1,8 @@
-"""Tab 2 — so sánh hai mô hình trên cùng bộ ảnh (Step 2.4).
+"""Tab 2: so sánh hai mô hình trên cùng bộ ảnh.
 
-Đây là tính năng cốt lõi của demo: cho thấy **cụ thể những ảnh nào** bị fuzzy
-logic loss sửa đúng, và những ảnh nào bị nó làm hỏng.
-
-Trạng thái mỗi ảnh được tính TRỰC TIẾP từ cặp mô hình đang chọn, không đọc sẵn
-từ `bc_indices.json`. Lý do: người dùng đổi dropdown thì màu phải đổi theo. File
-`bc_indices.json` (tính trên toàn bộ 10.000 ảnh test ở PHẦN 9) được dùng làm
-BỐI CẢNH — cho biết gallery 20 ảnh này đại diện cho tổng thể ra sao.
+Trạng thái mỗi ảnh (bên phải đúng hơn hay sai hơn bên trái) được tính trực tiếp
+từ cặp mô hình đang chọn, nên đổi dropdown thì màu viền đổi theo. File
+bc_indices.json chỉ dùng để hiển thị số liệu trên toàn tập test làm bối cảnh.
 """
 
 import base64
@@ -21,9 +17,9 @@ from core.inference import load_ckpt, predict, preprocess, topk
 from core.registry import RESULTS_DIR, default_pair, list_checkpoints, list_samples
 from ui.single_view import COARSE_HUE, CRITICAL, FINE_HUE, GOOD, MUTED, _bar, _mode
 
-# Ô b / ô c của flip matrix (mục 1.2 kế hoạch, PHẦN 9 notebook)
-FIXED = "fixed"      # ô c: mô hình TRÁI sai -> mô hình PHẢI đúng
-BROKEN = "broken"    # ô b: mô hình TRÁI đúng -> mô hình PHẢI sai
+# Trạng thái so sánh giữa mô hình trái và phải trên một ảnh
+FIXED = "fixed"      # trái sai -> phải đúng
+BROKEN = "broken"    # trái đúng -> phải sai
 SAME = "same"
 
 STATUS_STYLE = {
@@ -40,12 +36,7 @@ def _model(path_str):
 
 @st.cache_data(show_spinner=False)
 def _predict_one(ckpt_path, img_path):
-    """Dự đoán 1 ảnh bằng 1 checkpoint. Cache để đổi ảnh không tính lại.
-
-    Trả None nếu ảnh hỏng — PIL nạp "lười" nên Image.open() thường không ném
-    lỗi cho file cắt cụt, lỗi thật chỉ lộ khi đụng vào pixel (ở preprocess).
-    Một ảnh hỏng trong 20 ảnh gallery không được làm sập cả tab so sánh.
-    """
+    """Dự đoán 1 ảnh bằng 1 checkpoint, có cache. Trả None nếu ảnh hỏng."""
     model, meta = _model(ckpt_path)
     try:
         r = predict(model, preprocess(Image.open(img_path), meta), meta)
@@ -72,7 +63,7 @@ def _img_b64(img_path, size=96):
 
 
 def _status(left, right, true_fine):
-    """Ô nào của flip matrix: trái đúng/sai × phải đúng/sai."""
+    """Xác định trạng thái so sánh của một ảnh."""
     l_ok = left["pred_fine"] == true_fine
     r_ok = right["pred_fine"] == true_fine
     if not l_ok and r_ok:
@@ -83,7 +74,7 @@ def _status(left, right, true_fine):
 
 
 def _bc_context():
-    """Số liệu toàn tập test từ PHẦN 9 — để đặt gallery 20 ảnh vào bối cảnh."""
+    """Đọc số liệu trên toàn tập test để hiển thị làm bối cảnh."""
     p = RESULTS_DIR / "bc_indices.json"
     if not p.exists():
         return None
@@ -119,12 +110,7 @@ def _panel(side, item, pred, meta, hue_f, hue_c):
 
 @st.dialog("Chi tiết so sánh hai mô hình", width="large")
 def _detail_dialog(row, meta, left_it, right_it, mode):
-    """Cửa sổ nổi (modal) hiện chi tiết một ảnh.
-
-    Dùng st.dialog thay vì vẽ panel ở cuối trang: modal bật ngay giữa màn hình
-    bất kể đang cuộn tới đâu — nếu không, panel hiện tận dưới cùng sau 20 ảnh và
-    người dùng tưởng nút không chạy.
-    """
+    """Hiện cửa sổ chi tiết so sánh hai mô hình trên một ảnh."""
     s = row["s"]
     fn, cn = meta["fine_classes"], meta["coarse_classes"]
     lp, rp = row["left"], row["right"]
@@ -204,13 +190,13 @@ def render():
     _, meta = _model(str(left_it["path"]))
     mode = _mode()
 
-    # --- Tính trạng thái cho toàn bộ gallery ---
+    # Tính trạng thái cho toàn bộ gallery
     rows, broken = [], []
     for s in samples:
         lp = _predict_one(str(left_it["path"]), str(s["path"]))
         rp = _predict_one(str(right_it["path"]), str(s["path"]))
         if lp is None or rp is None:
-            broken.append(s["file"])          # ảnh hỏng: bỏ qua, không crash cả tab
+            broken.append(s["file"])          # bỏ qua ảnh hỏng
             continue
         rows.append({"s": s, "left": lp, "right": rp,
                      "status": _status(lp, rp, s.get("fine"))})
@@ -225,7 +211,7 @@ def render():
     n_fix = sum(r["status"] == FIXED for r in rows)
     n_brk = sum(r["status"] == BROKEN for r in rows)
 
-    # --- Chú giải: màu LUÔN đi kèm biểu tượng và chữ ---
+    # Chú giải màu
     st.markdown(
         f"<div style='display:flex;gap:20px;flex-wrap:wrap;font-size:14px;"
         f"margin:6px 0 14px'>"
@@ -248,7 +234,7 @@ def render():
             f"`table_flip_mcnemar.csv` để có kiểm định McNemar."
         )
 
-    # --- Lưới ảnh ---
+    # Lưới ảnh
     st.markdown("**Bấm _Chi tiết_ dưới một ảnh để mở cửa sổ so sánh xác suất "
                 "của hai mô hình.**")
     per_row = 5

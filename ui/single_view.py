@@ -1,9 +1,7 @@
-"""Tab 1 — một ảnh, một mô hình (Step 1.4).
+"""Tab 1: xem dự đoán của một mô hình trên một ảnh.
 
-Cột trái: chọn ảnh (gallery hoặc upload) + cho xem đúng thứ mô hình "nhìn".
-Cột phải: badge nhất quán, top-3 hai tầng, và bảng so ba chế độ suy luận.
-
-KHÔNG sửa core/ — tab chỉ gọi `predict()` rồi trình bày.
+Cột trái chọn ảnh (gallery hoặc upload), cột phải hiển thị badge nhất quán,
+top-3 hai tầng và bảng so ba chế độ suy luận.
 """
 
 import plotly.graph_objects as go
@@ -13,16 +11,15 @@ from PIL import Image
 from core.inference import predict, preprocess, topk
 from core.registry import list_samples
 
-# --- Bảng màu (đã chạy validator, PASS cả light lẫn dark) -----------------
-# Hai biểu đồ là hai ngữ cảnh sequential riêng biệt -> mỗi cái một hue.
-FINE_HUE = {"light": "#2a78d6", "dark": "#3987e5"}   # xanh dương
-COARSE_HUE = {"light": "#008300", "dark": "#008300"}  # xanh lá (bất biến)
-MUTED = "#898781"          # màu chữ trục — bất biến theo chế độ sáng/tối
+# Màu cho hai biểu đồ (nhãn con xanh dương, nhãn cha xanh lá) theo chế độ sáng/tối
+FINE_HUE = {"light": "#2a78d6", "dark": "#3987e5"}
+COARSE_HUE = {"light": "#008300", "dark": "#008300"}
+MUTED = "#898781"
 GOOD, CRITICAL = "#0ca30c", "#d03b3b"
 
 
 def _mode():
-    """Chế độ sáng/tối hiện tại của Streamlit, mặc định 'light' nếu không rõ."""
+    """Chế độ sáng/tối hiện tại của Streamlit, mặc định 'light'."""
     try:
         return st.context.theme.type or "light"
     except Exception:
@@ -30,11 +27,7 @@ def _mode():
 
 
 def _bar(items, hue, title):
-    """Bar chart ngang cho top-k: một hue, nhãn số trực tiếp, chrome tối giản.
-
-    Chỉ một chuỗi dữ liệu nên không cần legend; giá trị ghi thẳng ở đầu thanh
-    nên bỏ luôn lưới và trục x cho đỡ nhiễu.
-    """
+    """Vẽ bar chart ngang cho top-k, ghi giá trị trực tiếp ở đầu mỗi thanh."""
     names = [n for n, _ in items][::-1]      # plotly vẽ từ dưới lên
     vals = [v * 100 for _, v in items][::-1]
 
@@ -49,13 +42,11 @@ def _bar(items, hue, title):
     fig.update_layout(
         title=dict(text=title, font=dict(size=13, color=MUTED)),
         height=150 + 26 * len(items),
-        # automargin: tên lớp CIFAR-100 dài ngắn rất khác nhau
-        # ("bus" vs "sweet_pepper"). Đặt lề trái cố định sẽ cắt mất nhãn và
-        # biểu đồ thành vô nghĩa — không biết thanh nào ứng với lớp nào.
+        # automargin để tên lớp dài không bị cắt
         margin=dict(l=4, r=56, t=34, b=0, autoexpand=True),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        bargap=0.35,                          # khe hở giữa các thanh
+        bargap=0.35,
         showlegend=False,
         xaxis=dict(visible=False, range=[0, max(vals) * 1.28 or 1]),
         yaxis=dict(tickfont=dict(color=MUTED, size=12), ticksuffix="  ",
@@ -92,12 +83,10 @@ def _pick_image(samples):
 
 
 def _open_and_validate(source, label):
-    """Image.open() + ép giải mã đầy đủ NGAY, thay vì để lỗi lộ ra muộn.
+    """Mở ảnh và ép giải mã ngay để phát hiện file hỏng sớm.
 
-    PIL nạp "lười": Image.open() chỉ đọc header và thường KHÔNG ném lỗi cho
-    file bị cắt cụt/hỏng. Nếu không ép giải mã ở đây, ảnh hỏng sẽ vượt qua
-    hàm này trót lọt rồi làm CRASH st.image() hoặc predict() ở xa phía dưới —
-    lúc đó lỗi khó liên hệ về đúng nguyên nhân là "ảnh hỏng".
+    PIL nạp ảnh kiểu lười, file cắt cụt chỉ báo lỗi khi đụng tới pixel, nên gọi
+    img.load() ngay tại đây và bắt lỗi luôn.
     """
     try:
         img = Image.open(source)
@@ -123,8 +112,7 @@ def render(model, meta):
         with a:
             st.image(img, caption="Ảnh gốc", width='stretch')
         with b:
-            # Phóng to bản 32x32 bằng nội suy NEAREST để thấy rõ từng pixel —
-            # người xem cần hiểu mô hình thực sự "nhìn" thấy gì.
+            # Phóng to bản 32x32 bằng NEAREST để thấy rõ từng pixel
             small = img.convert("RGB").resize((32, 32), Image.BILINEAR)
             st.image(small.resize((256, 256), Image.NEAREST),
                      caption="Thứ mô hình nhìn thấy (32×32)",
@@ -140,10 +128,7 @@ def render(model, meta):
                 "xem cơ chế hai tầng đúng như thiết kế."
             )
 
-    # PIL nạp ảnh "lười": Image.open() ở _pick_image() chỉ đọc header và
-    # thường KHÔNG ném lỗi cho file bị cắt cụt/hỏng — lỗi thật (OSError) chỉ
-    # lộ ra khi thao tác trên pixel (ở đây là preprocess). Vì vậy phải bọc
-    # try/except Ở ĐÂY, không phải chỉ ở nơi gọi Image.open().
+    # Bọc try/except quanh phần xử lý ảnh để phòng ảnh hỏng.
     try:
         x = preprocess(img, meta)
         r = predict(model, x, meta)
@@ -158,7 +143,7 @@ def render(model, meta):
     coarse_names = meta["coarse_classes"]
 
     with right:
-        # --- Badge: màu KÈM biểu tượng và chữ, không bao giờ chỉ dựa vào màu ---
+        # Badge nhất quán / vi phạm
         if r["consistent"]:
             st.markdown(
                 f"<div style='background:{GOOD};color:#fff;padding:10px 16px;"

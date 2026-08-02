@@ -13,7 +13,7 @@ CKPT_DIR = PROJECT_ROOT / "checkpoints"
 SAMPLES_DIR = PROJECT_ROOT / "assets" / "samples"
 RESULTS_DIR = PROJECT_ROOT / "results"          # results.csv, bc_indices.json
 
-# Hậu tố tên file -> mô tả biến thể (quy ước đặt tên ở mục 1.2 kế hoạch)
+# Hậu tố tên file -> mô tả biến thể để hiển thị
 _SUFFIX_LABELS = {
     "_pilot": "pilot 15ep",
     "_res-product": "residuum Product",

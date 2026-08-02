@@ -1,8 +1,6 @@
-"""Entry point Streamlit — sidebar chọn checkpoint + 3 tab.
+"""Ứng dụng Streamlit: chọn checkpoint ở sidebar và hiển thị 3 tab.
 
-Step 1.3 dựng khung và sidebar; nội dung từng tab được thêm ở Step 1.4 (tab 1),
-2.4 (tab 2), 2.5 (tab 3). Khung này KHÔNG chứa logic mô hình — mọi thứ đó nằm
-trong core/ để tab nào cũng dùng chung một đường suy luận.
+Logic mô hình nằm trong core/, giao diện từng tab nằm trong ui/.
 """
 
 import sys
